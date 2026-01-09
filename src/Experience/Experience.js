@@ -203,6 +203,38 @@ export class Experience {
             this.cameraHeight += e.movementY * sensitivity * 10;
             this.cameraHeight = Math.max(5, Math.min(40, this.cameraHeight)); // Clamp height
         });
+
+        // Touch Look (Mobile)
+        this.lastTouchX = 0;
+        this.lastTouchY = 0;
+
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                this.lastTouchX = e.touches[0].clientX;
+                this.lastTouchY = e.touches[0].clientY;
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            // Check if touching joystick (don't rotate camera if driving)
+            if (e.target.closest('#joystick-container')) return;
+
+            if (!this.isPlaying) return;
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - this.lastTouchX;
+                const deltaY = touch.clientY - this.lastTouchY;
+
+                // Update Last
+                this.lastTouchX = touch.clientX;
+                this.lastTouchY = touch.clientY;
+
+                // Apply Rotation (Sensitivity adjusted for touch)
+                this.cameraAngle -= deltaX * 0.005;
+                this.cameraHeight += deltaY * 0.1;
+                this.cameraHeight = Math.max(5, Math.min(40, this.cameraHeight));
+            }
+        }, { passive: false });
     }
 
     setupStartButton() {
