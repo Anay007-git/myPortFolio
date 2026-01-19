@@ -1,4 +1,4 @@
-import { useKeyboardControls } from '@react-three/drei'
+import { useKeyboardControls, useGLTF, useAnimations } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { CapsuleCollider, RigidBody, vec3 } from '@react-three/rapier'
 import { useRef, useEffect } from 'react'
@@ -8,7 +8,12 @@ import useMultiplayer from '../../hooks/useMultiplayer.js'
 
 export default function Player() {
     const body = useRef()
+    const group = useRef()
     const [subscribeKeys, getKeys] = useKeyboardControls()
+
+    // Load Model
+    const { scene, animations } = useGLTF('/cyberpunk_character.glb')
+    const { actions } = useAnimations(animations, group)
 
     // Multiplayer Hook
     const { updatePlayer } = useMultiplayer()
@@ -18,6 +23,15 @@ export default function Player() {
     const RUN_SPEED = 8
     const JUMP_FORCE = 5
     const ROTATION_SPEED = 5
+
+    // Cast shadows
+    useEffect(() => {
+        scene.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true
+            }
+        })
+    }, [scene])
 
     useFrame((state, delta) => {
         if (!body.current) return
@@ -68,7 +82,26 @@ export default function Player() {
             const smoothRotation = currentRotation.slerp(targetRotation, ROTATION_SPEED * delta)
             body.current.setRotation(smoothRotation, true)
 
-            currentRotationQuat = smoothRotation // Update local var for network
+            currentRotationQuat = smoothRotation
+
+            // Rotate visual group to face forward if needed, but usually we rotate rigidbody. 
+            // If the model is facing wrong way, rotate the primitive below.
+        }
+
+        // --- Animation Logic ---
+        // Simple logic since we don't know exact animation names yet.
+        // Usually: 'Idle', 'Walk', 'Run'. We will try to play index 0 or search.
+        const isMoving = moveDirection.length() > 0.1
+        const actionName = isMoving ? (run ? 'Run' : 'Walk') : 'Idle'
+
+        // Fallback to first animation if named ones don't exist
+        if (actions[actionName]) {
+            actions[actionName].play()
+        } else if (animations.length > 0) {
+            // Just play the first one if moving
+            const firstAnim = animations[0].name
+            if (isMoving) actions[firstAnim].play()
+            else actions[firstAnim].stop()
         }
 
         // --- Jump ---
@@ -84,11 +117,10 @@ export default function Player() {
         state.camera.lookAt(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z)
 
         // --- Network Update ---
-        // Throttling normally recommended, but for local 5ms is fine
         updatePlayer(
             { x: bodyPosition.x, y: bodyPosition.y, z: bodyPosition.z },
             { x: currentRotationQuat.x, y: currentRotationQuat.y, z: currentRotationQuat.z, w: currentRotationQuat.w },
-            'idle' // TODO: Pass animation state
+            actionName
         )
     })
 
@@ -97,22 +129,13 @@ export default function Player() {
             ref={body}
             colliders={false}
             enabledRotations={[false, true, false]}
-            position={[0, 2, 0]}
+            position={[0, 5, 0]} // Higher spawn
             linearDamping={0.5}
         >
             <CapsuleCollider args={[0.5, 0.5]} position={[0, 1, 0]} />
 
-            {/* Visual Placeholder */}
-            <group position={[0, 0, 0]}>
-                <mesh castShadow position={[0, 1, 0]}>
-                    <capsuleGeometry args={[0.5, 1, 4, 8]} />
-                    <meshStandardMaterial color="#ff0055" />
-                </mesh>
-                {/* Direction Indicator */}
-                <mesh position={[0, 1.5, 0.5]}>
-                    <boxGeometry args={[0.2, 0.2, 0.5]} />
-                    <meshStandardMaterial color="white" />
-                </mesh>
+            <group ref={group} position={[0, 0, 0]}>
+                <primitive object={scene} scale={1} position={[0, 0, 0]} />
             </group>
         </RigidBody>
     )

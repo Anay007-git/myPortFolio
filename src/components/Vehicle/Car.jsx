@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { useFrame } from '@react-three/fiber'
-import { useKeyboardControls } from '@react-three/drei'
+import { useKeyboardControls, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import useGameStore from '../../stores/useGameStore.js'
 
@@ -10,6 +10,17 @@ export default function Car({ position }) {
     const [subscribeKeys, getKeys] = useKeyboardControls()
     const controlMode = useGameStore((state) => state.controlMode)
     const setControlMode = useGameStore((state) => state.setControlMode)
+
+    const carModel = useGLTF('/cyberpunk_car.glb')
+    // Enable shadows for the model
+    useEffect(() => {
+        carModel.scene.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true
+                child.receiveShadow = true
+            }
+        })
+    }, [carModel])
 
     // Config
     const ACCELERATION = 20
@@ -54,7 +65,7 @@ export default function Car({ position }) {
         // --- Camera Follow Car ---
         const bodyPosition = body.current.translation()
         // Offset behind car
-        const cameraOffset = new THREE.Vector3(0, 5, 10).applyQuaternion(quaternion)
+        const cameraOffset = new THREE.Vector3(0, 5, 12).applyQuaternion(quaternion) // Slightly further back for the car model
         const cameraTargetPos = new THREE.Vector3(
             bodyPosition.x + cameraOffset.x,
             bodyPosition.y + cameraOffset.y,
@@ -67,7 +78,6 @@ export default function Car({ position }) {
 
     // Interaction check to exit
     useEffect(() => {
-        // Need a better way to toggle, maybe input subscription
         const unsubscribe = subscribeKeys(
             (state) => state.interact,
             (value) => {
@@ -80,16 +90,6 @@ export default function Car({ position }) {
         return unsubscribe
     }, [controlMode, setControlMode, subscribeKeys])
 
-    // Interaction check to enter (handled by player or global handler usually, but we can do a distance check here for now)
-    // Actually, let's put a "Interaction Zone" around the car.
-
-    useFrame(() => {
-        if (controlMode === 'character' && body.current) {
-            // Check distance to player? 
-            // Ideally we have a 'Player' ref or position in store.
-        }
-    })
-
     return (
         <RigidBody
             ref={body}
@@ -100,14 +100,12 @@ export default function Car({ position }) {
             angularDamping={0.5}
         >
             {/* Visuals */}
-            <mesh castShadow>
-                <boxGeometry args={[2, 1, 4]} />
-                <meshStandardMaterial color="cyan" />
-            </mesh>
-            <mesh position={[0, 0.5, 0.5]}>
-                <boxGeometry args={[1.8, 0.8, 2]} />
-                <meshStandardMaterial color="#000" opacity={0.5} transparent />
-            </mesh>
+            <primitive
+                object={carModel.scene}
+                scale={1}
+                rotation-y={Math.PI} // Adjust if model faces backwards
+                position={[0, -1, 0]} // Lower visual to align with collider bottom
+            />
         </RigidBody>
     )
 }
