@@ -2,150 +2,29 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description"
-        content="Anay Biswas - Sr. Business Intelligence Developer | Interactive 3D Portfolio Experience">
-    <meta name="keywords" content="Anay Biswas, BI Developer, Data Analytics, Tableau, Python, SQL, AWS, Portfolio">
-    <meta name="author" content="Anay Biswas">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Anay's GTA Portfolio</title>
+    <style>
+        #root {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="Anay Biswas | Interactive 3D Portfolio">
-    <meta property="og:description"
-        content="Sr. Business Intelligence Developer - Explore my gamified 3D portfolio experience">
-    <meta property="og:type" content="website">
-
-    <title>Anay Biswas | 3D Portfolio</title>
-
-    <!-- Favicon -->
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet">
-
-    <link rel="stylesheet" href="/src/styles/main.css">
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            user-select: none;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-        <div class="loader">
-            <div class="loader-spinner"></div>
-            <p class="loader-text">Initializing Experience</p>
-            <div class="loader-progress">
-                <div class="loader-progress-bar"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Canvas Container -->
-    <canvas id="experience-canvas"></canvas>
-
-    <!-- UI Overlay -->
-    <div id="ui-overlay">
-        <!-- Top HUD -->
-        <div id="hud-top" class="hud-hidden">
-            <div class="hud-profile glass-panel">
-                <div class="hud-avatar">AB</div>
-                <div class="hud-info">
-                    <h1>Anay Biswas</h1>
-                    <p>Sr. BI Developer</p>
-                </div>
-            </div>
-            <div class="hud-stats">
-                <div class="stat-item">
-                    <span class="stat-icon">💼</span>
-                    <span class="stat-value">3.5+ Years</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-icon">📍</span>
-                    <span class="stat-value">Kolkata</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-icon">🎯</span>
-                    <span class="stat-value">6 Zones</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Instructions -->
-        <div id="instructions" class="glass-panel">
-            <span class="welcome-icon">🚗</span>
-            <h2>Welcome!</h2>
-            <p class="subtitle">Explore my interactive 3D portfolio</p>
-
-            <div class="controls-grid">
-                <div class="control-item">
-                    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
-                    <span>Drive</span>
-                </div>
-                <div class="control-item">
-                    <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>
-                    <span>or Arrows</span>
-                </div>
-                <div class="control-item">
-                    <kbd>E</kbd>
-                    <span>Interact</span>
-                </div>
-                <div class="control-item">
-                    <kbd>ESC</kbd>
-                    <span>Close</span>
-                </div>
-            </div>
-
-            <p>Drive to glowing zones to discover my skills, experience, and projects</p>
-
-            <button id="start-btn" class="btn-primary">Start Exploring</button>
-        </div>
-
-        <!-- Zone Indicator -->
-        <div id="zone-indicator" class="hidden">
-            <span class="zone-name"></span>
-            <span class="zone-hint">Press <kbd>E</kbd> to interact</span>
-        </div>
-
-        <!-- Mini Map -->
-        <div id="mini-map" class="hud-hidden">
-            <div class="mini-map-title">Map</div>
-            <div class="mini-map-grid">
-                <div class="map-player" id="map-player"></div>
-                <!-- Zones will be added dynamically -->
-            </div>
-        </div>
-
-        <!-- Mobile Joystick Container -->
-        <div id="mobile-controls" class="hidden">
-            <div id="joystick-container">
-                <div id="joystick-base">
-                    <div id="joystick-stick"></div>
-                </div>
-            </div>
-            <button id="mobile-interact-btn" class="hidden">
-                <span>👆</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div id="modal" class="hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content glass-panel">
-            <button class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon"></div>
-                <h2 class="modal-title"></h2>
-            </div>
-            <div class="modal-body"></div>
-        </div>
-    </div>
-    <p class="touch-hint" style="display:none">Use Joystick</p>
-
-    <script type="module" src="/src/main.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
 </body>
 
 </html>

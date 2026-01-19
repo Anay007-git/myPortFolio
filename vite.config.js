@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: './',
+  plugins: [react()],
+  server: {
+    host: true, // Open to local network and display URL
+    open: true, // Open automatically
+  },
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
-  },
-  server: {
-    host: true,
-    open: true
+    emptyOutDir: true,
+    sourcemap: true
   }
 })

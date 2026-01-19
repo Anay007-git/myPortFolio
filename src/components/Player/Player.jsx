@@ -1,0 +1,119 @@
+import { useKeyboardControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { CapsuleCollider, RigidBody, vec3 } from '@react-three/rapier'
+import { useRef, useEffect } from 'react'
+import * as THREE from 'three'
+import useGameStore from '../../stores/useGameStore.js'
+import useMultiplayer from '../../hooks/useMultiplayer.js'
+
+export default function Player() {
+    const body = useRef()
+    const [subscribeKeys, getKeys] = useKeyboardControls()
+
+    // Multiplayer Hook
+    const { updatePlayer } = useMultiplayer()
+
+    // Config
+    const MOVEMENT_SPEED = 5
+    const RUN_SPEED = 8
+    const JUMP_FORCE = 5
+    const ROTATION_SPEED = 5
+
+    useFrame((state, delta) => {
+        if (!body.current) return
+
+        const { forward, backward, left, right, jump, run } = getKeys()
+
+        // --- Movement ---
+        const velocity = body.current.linvel()
+        const cameraDirection = new THREE.Vector3()
+        state.camera.getWorldDirection(cameraDirection)
+        cameraDirection.y = 0
+        cameraDirection.normalize()
+
+        const cameraRight = new THREE.Vector3()
+        cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0))
+
+        const moveDirection = new THREE.Vector3()
+        if (forward) moveDirection.add(cameraDirection)
+        if (backward) moveDirection.sub(cameraDirection)
+        if (right) moveDirection.add(cameraRight)
+        if (left) moveDirection.sub(cameraRight)
+
+        moveDirection.normalize()
+
+        const speed = run ? RUN_SPEED : MOVEMENT_SPEED
+        const desiredVelocity = moveDirection.multiplyScalar(speed)
+
+        body.current.setLinvel({
+            x: desiredVelocity.x,
+            y: velocity.y,
+            z: desiredVelocity.z
+        }, true)
+
+        // --- Rotation ---
+        let currentRotationQuat = body.current.rotation()
+
+        if (moveDirection.length() > 0.1) {
+            const currentRotation = new THREE.Quaternion(
+                currentRotationQuat.x,
+                currentRotationQuat.y,
+                currentRotationQuat.z,
+                currentRotationQuat.w
+            )
+
+            const targetRotation = new THREE.Quaternion()
+            targetRotation.setFromUnitVectors(new THREE.Vector3(0, 0, 1), moveDirection.normalize())
+
+            const smoothRotation = currentRotation.slerp(targetRotation, ROTATION_SPEED * delta)
+            body.current.setRotation(smoothRotation, true)
+
+            currentRotationQuat = smoothRotation // Update local var for network
+        }
+
+        // --- Jump ---
+        if (jump && Math.abs(velocity.y) < 0.1) {
+            body.current.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true)
+        }
+
+        // --- Camera Follow ---
+        const bodyPosition = body.current.translation()
+
+        state.camera.position.x += (bodyPosition.x + 2.5 - state.camera.position.x) * delta * 2
+        state.camera.position.z += (bodyPosition.z + 6 - state.camera.position.z) * delta * 2
+        state.camera.lookAt(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z)
+
+        // --- Network Update ---
+        // Throttling normally recommended, but for local 5ms is fine
+        updatePlayer(
+            { x: bodyPosition.x, y: bodyPosition.y, z: bodyPosition.z },
+            { x: currentRotationQuat.x, y: currentRotationQuat.y, z: currentRotationQuat.z, w: currentRotationQuat.w },
+            'idle' // TODO: Pass animation state
+        )
+    })
+
+    return (
+        <RigidBody
+            ref={body}
+            colliders={false}
+            enabledRotations={[false, true, false]}
+            position={[0, 2, 0]}
+            linearDamping={0.5}
+        >
+            <CapsuleCollider args={[0.5, 0.5]} position={[0, 1, 0]} />
+
+            {/* Visual Placeholder */}
+            <group position={[0, 0, 0]}>
+                <mesh castShadow position={[0, 1, 0]}>
+                    <capsuleGeometry args={[0.5, 1, 4, 8]} />
+                    <meshStandardMaterial color="#ff0055" />
+                </mesh>
+                {/* Direction Indicator */}
+                <mesh position={[0, 1.5, 0.5]}>
+                    <boxGeometry args={[0.2, 0.2, 0.5]} />
+                    <meshStandardMaterial color="white" />
+                </mesh>
+            </group>
+        </RigidBody>
+    )
+}
