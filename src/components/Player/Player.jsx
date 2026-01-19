@@ -15,6 +15,11 @@ export default function Player() {
     const { scene, animations } = useGLTF('/cyberpunk_character.glb')
     const { actions } = useAnimations(animations, group)
 
+    // DEBUG: Log animations to find correct names
+    useEffect(() => {
+        console.log("Available Animations:", animations.map(a => a.name))
+    }, [animations])
+
     // Multiplayer Hook
     const { updatePlayer } = useMultiplayer()
 

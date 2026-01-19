@@ -3,6 +3,7 @@ import { useGLTF } from '@react-three/drei'
 
 export default function World() {
     const map = useGLTF('/low_poly_city.glb')
+    console.log("City Model Loaded:", map)
 
     return (
         <group>
