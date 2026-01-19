@@ -161,12 +161,5 @@ export const zoneConfig = [
         icon: '🎓',
         position: { x: 0, z: -25 },
         color: 0xec4899
-    },
-    {
-        id: 'contact',
-        name: 'Contact',
-        icon: '📧',
-        position: { x: 0, z: 25 },
-        color: 0xef4444
     }
 ];
