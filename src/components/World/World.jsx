@@ -9,7 +9,8 @@ export default function World() {
         <group>
             {/* City Map */}
             <RigidBody type="fixed" colliders="trimesh">
-                <primitive object={map.scene} scale={1} position={[0, -2, 0]} />
+                {/* Scaled up seeing as it was invisible/small */}
+                <primitive object={map.scene} scale={10} position={[0, -2, 0]} />
             </RigidBody>
 
             {/* Fallback Ground (Invisible logic floor if needed, but trimesh usually handles it) */}

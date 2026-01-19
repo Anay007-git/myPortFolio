@@ -31,7 +31,7 @@ export default function App() {
                 <color attach="background" args={['#201919']} />
 
                 <Suspense fallback={null}>
-                    <Physics debug={window.location.hash.includes('debug')}>
+                    <Physics>
                         <Experience />
                     </Physics>
                 </Suspense>

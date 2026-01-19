@@ -94,19 +94,17 @@ export default function Player() {
         }
 
         // --- Animation Logic ---
-        // Simple logic since we don't know exact animation names yet.
-        // Usually: 'Idle', 'Walk', 'Run'. We will try to play index 0 or search.
-        const isMoving = moveDirection.length() > 0.1
-        const actionName = isMoving ? (run ? 'Run' : 'Walk') : 'Idle'
+        // Protocol: 'Run' | 'Walk' | 'Idle'
+        // Model only has: ['A-pose']
 
-        // Fallback to first animation if named ones don't exist
-        if (actions[actionName]) {
-            actions[actionName].play()
+        const isMoving = moveDirection.length() > 0.1
+
+        // Since we only have 'A-pose', we ensure it plays to avoid T-pose/static.
+        if (actions['A-pose']) {
+            actions['A-pose'].reset().fadeIn(0.2).play()
         } else if (animations.length > 0) {
-            // Just play the first one if moving
-            const firstAnim = animations[0].name
-            if (isMoving) actions[firstAnim].play()
-            else actions[firstAnim].stop()
+            // General fallback
+            actions[animations[0].name].reset().fadeIn(0.2).play()
         }
 
         // --- Jump ---
