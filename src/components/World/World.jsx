@@ -1,9 +1,25 @@
 import { RigidBody } from '@react-three/rapier'
 import { useGLTF } from '@react-three/drei'
+import { useEffect } from 'react'
+import * as THREE from 'three'
 
 export default function World() {
     const map = useGLTF('/low_poly_city.glb')
     console.log("City Model Loaded:", map)
+
+    // Fix materials - enable double-sided rendering and ensure visibility
+    useEffect(() => {
+        map.scene.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true
+                child.receiveShadow = true
+                if (child.material) {
+                    child.material.side = THREE.DoubleSide
+                    child.material.needsUpdate = true
+                }
+            }
+        })
+    }, [map])
 
     return (
         <group>
