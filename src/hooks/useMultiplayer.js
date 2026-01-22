@@ -4,7 +4,10 @@ import useGameStore from '../stores/useGameStore.js'
 import * as THREE from 'three'
 
 const socket = io('http://localhost:3000', {
-    autoConnect: false
+    autoConnect: false,
+    reconnection: true,
+    reconnectionAttempts: 3,
+    timeout: 5000,
 })
 
 export default function useMultiplayer() {
@@ -14,8 +17,10 @@ export default function useMultiplayer() {
     useEffect(() => {
         socket.connect()
 
-        socket.on('connect', () => {
-            console.log('Connected to server with ID:', socket.id)
+        socket.on('connect_error', (err) => {
+            // Silently fail if server is not up
+            console.log('Multiplayer server not found. Running in single player mode.')
+            socket.disconnect()
         })
 
         socket.on('players', (serverPlayers) => {

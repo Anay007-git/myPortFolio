@@ -110,14 +110,18 @@ export default function Player() {
             actionName = run ? 'Run' : 'Walk'
         }
 
-        // Apply animations (standard names, might need adjustment after log)
-        const activeAction = actions[actionName] || actions['Walking'] || actions['Running'] || actions['Idle']
+        // Apply animations (safely handle missing clips)
+        const activeAction = actions[actionName] || actions['Walking'] || actions['Running'] || actions['Idle'] || actions['A-pose']
+
         if (activeAction) {
             // Fade out others
             Object.values(actions).forEach(action => {
-                if (action !== activeAction) action.fadeOut(0.2)
+                if (action !== activeAction && action.isRunning()) action.fadeOut(0.2)
             })
             activeAction.reset().fadeIn(0.2).play()
+        } else {
+            // If no animations found, ensure we log it only once
+            // (Current log in useEffect handles this)
         }
 
         updatePlayer(
