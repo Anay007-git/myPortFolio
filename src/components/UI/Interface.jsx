@@ -5,12 +5,18 @@ export default function Interface() {
     const phase = useGameStore((state) => state.phase)
     const controlMode = useGameStore((state) => state.controlMode)
     const currentMission = useGameStore((state) => state.currentMission)
-
-    // We can add a local state for interaction prompt if we had a way to broadcast it
-    // For now, static or store based
+    const interactionTarget = useGameStore((state) => state.interactionTarget)
 
     return (
         <div className="ui-container">
+            {/* Interaction Prompt */}
+            {interactionTarget && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mt-20 pointer-events-auto">
+                    <div className="bg-black/70 text-white px-6 py-3 rounded-lg border-2 border-[#ff0055] font-black tracking-widest animate-pulse">
+                        {interactionTarget.label}
+                    </div>
+                </div>
+            )}
             {/* HUD */}
             <div className="absolute top-4 left-4 text-white font-bold text-xl drop-shadow-md">
                 <div className="bg-black/50 p-4 rounded-lg border-l-4 border-[#ff0055]">
