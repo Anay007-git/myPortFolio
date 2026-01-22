@@ -31,5 +31,11 @@ export default function Experience() {
         {/* We always render the car, but we only control it if mode is vehicle */}
         <Car position={[0, 2, -10]} />
 
+        {/* Test Mesh to verify visibility */}
+        <mesh position={[0, 5, 5]}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial color="red" />
+        </mesh>
+
     </>
 }
