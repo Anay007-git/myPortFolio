@@ -120,6 +120,11 @@ export default function Player() {
         state.camera.lookAt(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z)
 
         // --- Network Update ---
+        let actionName = 'Idle'
+        if (isMoving) {
+            actionName = run ? 'Run' : 'Walk'
+        }
+
         updatePlayer(
             { x: bodyPosition.x, y: bodyPosition.y, z: bodyPosition.z },
             { x: currentRotationQuat.x, y: currentRotationQuat.y, z: currentRotationQuat.z, w: currentRotationQuat.w },
