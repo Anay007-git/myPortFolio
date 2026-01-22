@@ -12,14 +12,15 @@ export default function Player() {
     const [subscribeKeys, getKeys] = useKeyboardControls()
 
     // Load Model
-    const { scene, animations } = useGLTF('/cyberpunk_character.glb')
-    console.log("Player Model Loaded:", scene)
-    const { actions } = useAnimations(animations, group)
+    // Load Model - COMMENTED OUT TEMPORARILY (TOO LARGE)
+    // const { scene, animations } = useGLTF('/cyberpunk_character.glb')
+    // console.log("Player Model Loaded:", scene)
+    // const { actions } = useAnimations(animations, group)
 
     // DEBUG: Log animations to find correct names
-    useEffect(() => {
-        console.log("Available Animations:", animations.map(a => a.name))
-    }, [animations])
+    // useEffect(() => {
+    //     console.log("Available Animations:", animations.map(a => a.name))
+    // }, [animations])
 
     // Multiplayer Hook
     const { updatePlayer } = useMultiplayer()
@@ -31,13 +32,13 @@ export default function Player() {
     const ROTATION_SPEED = 5
 
     // Cast shadows
-    useEffect(() => {
-        scene.traverse((child) => {
-            if (child.isMesh) {
-                child.castShadow = true
-            }
-        })
-    }, [scene])
+    // useEffect(() => {
+    //     scene.traverse((child) => {
+    //         if (child.isMesh) {
+    //             child.castShadow = true
+    //         }
+    //     })
+    // }, [scene])
 
     useFrame((state, delta) => {
         if (!body.current) return
@@ -101,12 +102,12 @@ export default function Player() {
         const isMoving = moveDirection.length() > 0.1
 
         // Since we only have 'A-pose', we ensure it plays to avoid T-pose/static.
-        if (actions['A-pose']) {
-            actions['A-pose'].reset().fadeIn(0.2).play()
-        } else if (animations.length > 0) {
-            // General fallback
-            actions[animations[0].name].reset().fadeIn(0.2).play()
-        }
+        // if (actions['A-pose']) {
+        //     actions['A-pose'].reset().fadeIn(0.2).play()
+        // } else if (animations.length > 0) {
+        //     // General fallback
+        //     actions[animations[0].name].reset().fadeIn(0.2).play()
+        // }
 
         // --- Jump ---
         if (jump && Math.abs(velocity.y) < 0.1) {
@@ -144,7 +145,11 @@ export default function Player() {
             <CapsuleCollider args={[0.5, 0.5]} position={[0, 1, 0]} />
 
             <group ref={group} position={[0, 0, 0]}>
-                <primitive object={scene} scale={1} position={[0, 0, 0]} />
+                {/* <primitive object={scene} scale={1} position={[0, 0, 0]} /> */}
+                <mesh position={[0, 1, 0]}>
+                    <capsuleGeometry args={[0.5, 1, 4, 8]} />
+                    <meshStandardMaterial color="hotpink" />
+                </mesh>
             </group>
         </RigidBody>
     )
