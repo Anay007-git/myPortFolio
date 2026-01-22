@@ -2,11 +2,13 @@ import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
 import { Physics } from '@react-three/rapier'
 import { KeyboardControls, Loader } from '@react-three/drei'
+import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing'
 import Experience from './Experience.jsx'
 import Navbar from './components/UI/Navbar.jsx'
 import GtaHud from './components/UI/GtaHud.jsx'
 import MissionOverlay from './components/UI/MissionOverlay.jsx'
 import Interface from './components/UI/Interface.jsx'
+import MusicPlayer from './components/UI/MusicPlayer.jsx'
 
 export default function App() {
     return (
@@ -28,7 +30,10 @@ export default function App() {
                 <Navbar />
                 <GtaHud />
                 <MissionOverlay />
+                <GtaHud />
+                <MissionOverlay />
                 <Interface />
+                <MusicPlayer />
 
                 {/* 3D World Layer */}
                 <div className="canvas-container">
@@ -49,6 +54,12 @@ export default function App() {
                                 <Experience />
                             </Physics>
                         </Suspense>
+
+                        <EffectComposer disableNormalPass>
+                            <Bloom luminanceThreshold={1} mipmapBlur intensity={1.5} radius={0.6} />
+                            <ChromaticAberration offset={[0.002, 0.002]} />
+                            <Vignette eskil={false} offset={0.1} darkness={0.7} />
+                        </EffectComposer>
                     </Canvas>
                 </div>
                 <Loader />

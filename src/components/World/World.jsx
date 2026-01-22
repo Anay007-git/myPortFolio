@@ -1,4 +1,5 @@
 import { RigidBody } from '@react-three/rapier'
+import { MeshReflectorMaterial, Environment } from '@react-three/drei'
 
 // Optimized Modular City Configuration
 const BUILDING_COUNT = 45
@@ -31,23 +32,36 @@ const buildings = Array.from({ length: BUILDING_COUNT }, (_, i) => {
 export default function World() {
     return (
         <group>
-            {/* Massive Digital Ground */}
+            {/* Massive Digital Ground with Reflections */}
             <RigidBody type="fixed" colliders="cuboid" position={[0, -0.5, 0]}>
                 <mesh receiveShadow rotation-x={-Math.PI / 2}>
                     <planeGeometry args={[1000, 1000]} />
-                    <meshStandardMaterial color="#050505" />
+                    <MeshReflectorMaterial
+                        blur={[300, 100]}
+                        resolution={1024}
+                        mixBlur={1}
+                        mixStrength={40}
+                        roughness={1}
+                        depthScale={1.2}
+                        minDepthThreshold={0.4}
+                        maxDepthThreshold={1.4}
+                        color="#101010"
+                        metalness={0.5}
+                    />
                 </mesh>
                 {/* Visual Grid Layer */}
                 <mesh position={[0, 0.01, 0]} rotation-x={-Math.PI / 2}>
                     <planeGeometry args={[1000, 1000]} />
-                    <meshStandardMaterial
+                    <meshBasicMaterial
                         color="#00f2ff"
                         transparent
-                        opacity={0.08}
+                        opacity={0.15}
                         wireframe
                     />
                 </mesh>
             </RigidBody>
+
+            <Environment preset="night" />
 
             {/* Modular Buildings */}
             {buildings.map((b, i) => (
