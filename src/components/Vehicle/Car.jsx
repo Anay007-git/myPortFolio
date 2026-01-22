@@ -84,7 +84,7 @@ export default function Car({ position }) {
 
         // --- Camera Follow Car ---
         const bodyPosition = body.current.translation()
-        const cameraOffset = new THREE.Vector3(0, 4, -10).applyQuaternion(quaternion)
+        const cameraOffset = new THREE.Vector3(0, 8, -20).applyQuaternion(quaternion)
         const targetCamPos = new THREE.Vector3(
             bodyPosition.x + cameraOffset.x,
             bodyPosition.y + cameraOffset.y,
@@ -92,7 +92,7 @@ export default function Car({ position }) {
         )
 
         state.camera.position.lerp(targetCamPos, delta * 3)
-        state.camera.lookAt(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z)
+        state.camera.lookAt(bodyPosition.x, bodyPosition.y + 2, bodyPosition.z)
     })
 
     // Interaction handling

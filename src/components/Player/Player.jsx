@@ -24,10 +24,10 @@ export default function Player() {
     const { updatePlayer } = useMultiplayer()
 
     // Config
-    const MOVEMENT_SPEED = 5
-    const RUN_SPEED = 8
-    const JUMP_FORCE = 5
-    const ROTATION_SPEED = 5
+    const MOVEMENT_SPEED = 12
+    const RUN_SPEED = 18
+    const JUMP_FORCE = 8
+    const ROTATION_SPEED = 8
 
     // Cast shadows
     useEffect(() => {
@@ -40,7 +40,7 @@ export default function Player() {
 
     const controlMode = useGameStore((state) => state.controlMode)
 
-    const cameraOffset = new THREE.Vector3(0, 5, 8)
+    const cameraOffset = new THREE.Vector3(0, 8, 15)
     const cameraTarget = new THREE.Vector3()
 
     useFrame((state, delta) => {
@@ -143,13 +143,13 @@ export default function Player() {
             name="player"
             colliders={false}
             enabledRotations={[false, true, false]}
-            position={[0, 5, 0]}
+            position={[0, 10, 0]}
             linearDamping={0.5}
         >
-            <CapsuleCollider args={[0.5, 0.5]} position={[0, 1, 0]} />
+            <CapsuleCollider args={[1, 1]} position={[0, 2, 0]} />
 
             <group ref={group} position={[0, 0, 0]}>
-                <primitive object={scene} scale={0.5} position={[0, 0, 0]} />
+                <primitive object={scene} scale={1.5} position={[0, 0, 0]} />
             </group>
         </RigidBody>
     )
