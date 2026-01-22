@@ -14,13 +14,13 @@ export default function useMultiplayer() {
     const playerBody = useRef(null) // We need a way to get local player position
 
     useEffect(() => {
-        socket.connect()
-
-        socket.on('connect_error', (err) => {
-            // Silently fail if server is not up
-            console.log('Multiplayer server not found. Running in single player mode.')
-            socket.disconnect()
-        })
+        if (!socket.connected) {
+            socket.on('connect_error', (err) => {
+                // Silently fail if server is not up (only log once if needed, or suppress)
+                // socket.disconnect() // Disconnect handled automatically by reconnection: false usually
+            })
+            socket.connect()
+        }
 
         socket.on('players', (serverPlayers) => {
             setPlayers(serverPlayers)

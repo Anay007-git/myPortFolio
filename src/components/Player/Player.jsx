@@ -16,9 +16,9 @@ export default function Player() {
     const { actions } = useAnimations(animations, group)
 
     // DEBUG: Log animations to find correct names
-    useEffect(() => {
-        console.log("Player Animations:", animations.map(a => a.name))
-    }, [animations])
+    // useEffect(() => {
+    //     console.log("Player Animations:", animations.map(a => a.name))
+    // }, [animations])
 
     // Multiplayer Hook
     const { updatePlayer } = useMultiplayer()
