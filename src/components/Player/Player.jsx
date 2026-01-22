@@ -40,88 +40,71 @@ export default function Player() {
     //     })
     // }, [scene])
 
+    const cameraOffset = new THREE.Vector3(0, 5, 8)
+    const cameraTarget = new THREE.Vector3()
+
     useFrame((state, delta) => {
         if (!body.current) return
 
         const { forward, backward, left, right, jump, run } = getKeys()
 
-        // --- Movement ---
+        // --- Camera Relative Movement ---
         const velocity = body.current.linvel()
-        const cameraDirection = new THREE.Vector3()
-        state.camera.getWorldDirection(cameraDirection)
-        cameraDirection.y = 0
-        cameraDirection.normalize()
 
-        const cameraRight = new THREE.Vector3()
-        cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0))
+        // Get camera basis
+        const cameraRotation = new THREE.Euler().setFromQuaternion(state.camera.quaternion, 'YXZ')
+        const forwardVector = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(0, cameraRotation.y, 0))
+        const rightVector = new THREE.Vector3(1, 0, 0).applyEuler(new THREE.Euler(0, cameraRotation.y, 0))
 
         const moveDirection = new THREE.Vector3()
-        if (forward) moveDirection.add(cameraDirection)
-        if (backward) moveDirection.sub(cameraDirection)
-        if (right) moveDirection.add(cameraRight)
-        if (left) moveDirection.sub(cameraRight)
+        if (forward) moveDirection.add(forwardVector)
+        if (backward) moveDirection.sub(forwardVector)
+        if (right) moveDirection.add(rightVector)
+        if (left) moveDirection.sub(rightVector)
 
         moveDirection.normalize()
 
         const speed = run ? RUN_SPEED : MOVEMENT_SPEED
         const desiredVelocity = moveDirection.multiplyScalar(speed)
 
+        // Apply movement physics
         body.current.setLinvel({
             x: desiredVelocity.x,
             y: velocity.y,
             z: desiredVelocity.z
         }, true)
 
-        // --- Rotation ---
-        let currentRotationQuat = body.current.rotation()
-
+        // --- Rotation (Face movement direction) ---
         if (moveDirection.length() > 0.1) {
-            const currentRotation = new THREE.Quaternion(
-                currentRotationQuat.x,
-                currentRotationQuat.y,
-                currentRotationQuat.z,
-                currentRotationQuat.w
-            )
+            const targetRotation = Math.atan2(moveDirection.x, moveDirection.z)
+            const currentRotation = group.current.rotation.y
 
-            const targetRotation = new THREE.Quaternion()
-            targetRotation.setFromUnitVectors(new THREE.Vector3(0, 0, 1), moveDirection.normalize())
+            // Shortest path rotation
+            let diff = targetRotation - currentRotation
+            while (diff < -Math.PI) diff += Math.PI * 2
+            while (diff > Math.PI) diff -= Math.PI * 2
 
-            const smoothRotation = currentRotation.slerp(targetRotation, ROTATION_SPEED * delta)
-            body.current.setRotation(smoothRotation, true)
-
-            currentRotationQuat = smoothRotation
-
-            // Rotate visual group to face forward if needed, but usually we rotate rigidbody. 
-            // If the model is facing wrong way, rotate the primitive below.
+            group.current.rotation.y += diff * delta * ROTATION_SPEED
         }
 
-        // --- Animation Logic ---
-        // Protocol: 'Run' | 'Walk' | 'Idle'
-        // Model only has: ['A-pose']
-
-        const isMoving = moveDirection.length() > 0.1
-
-        // Since we only have 'A-pose', we ensure it plays to avoid T-pose/static.
-        // if (actions['A-pose']) {
-        //     actions['A-pose'].reset().fadeIn(0.2).play()
-        // } else if (animations.length > 0) {
-        //     // General fallback
-        //     actions[animations[0].name].reset().fadeIn(0.2).play()
-        // }
-
-        // --- Jump ---
-        if (jump && Math.abs(velocity.y) < 0.1) {
-            body.current.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true)
-        }
-
-        // --- Camera Follow ---
+        // --- Smooth Camera Follow (GTA Style) ---
         const bodyPosition = body.current.translation()
+        const targetCamPos = new THREE.Vector3(
+            bodyPosition.x + cameraOffset.x,
+            bodyPosition.y + cameraOffset.y,
+            bodyPosition.z + cameraOffset.z
+        )
 
-        state.camera.position.x += (bodyPosition.x + 2.5 - state.camera.position.x) * delta * 2
-        state.camera.position.z += (bodyPosition.z + 6 - state.camera.position.z) * delta * 2
-        state.camera.lookAt(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z)
+        // Dynamic FOV for speed feel
+        state.camera.fov = THREE.MathUtils.lerp(state.camera.fov, run && moveDirection.length() > 0.1 ? 55 : 45, delta * 2)
+        state.camera.updateProjectionMatrix()
 
-        // --- Network Update ---
+        state.camera.position.lerp(targetCamPos, delta * 3)
+        cameraTarget.lerp(new THREE.Vector3(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z), delta * 5)
+        state.camera.lookAt(cameraTarget)
+
+        // --- Animation Logic (Multiplayer Only for now) ---
+        const isMoving = moveDirection.length() > 0.1
         let actionName = 'Idle'
         if (isMoving) {
             actionName = run ? 'Run' : 'Walk'
@@ -129,9 +112,14 @@ export default function Player() {
 
         updatePlayer(
             { x: bodyPosition.x, y: bodyPosition.y, z: bodyPosition.z },
-            { x: currentRotationQuat.x, y: currentRotationQuat.y, z: currentRotationQuat.z, w: currentRotationQuat.w },
+            { x: 0, y: group.current.rotation.y, z: 0, w: 1 }, // Simpler rotation for net
             actionName
         )
+
+        // --- Jump ---
+        if (jump && Math.abs(velocity.y) < 0.1) {
+            body.current.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true)
+        }
     })
 
     return (
