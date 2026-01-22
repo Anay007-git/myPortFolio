@@ -20,7 +20,17 @@ export default function MusicPlayer() {
         const handleInteraction = () => {
             if (!hasInteracted) {
                 setHasInteracted(true)
-                audioRef.current.play().catch(e => console.log("Audio play failed:", e))
+                // Attempt to play only if we haven't failed before
+                const playPromise = audioRef.current.play()
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        // Suppress 'no supported sources' error since bgm.mp3 is optional
+                        if (error.name !== 'NotSupportedError') {
+                            console.log("Audio play warning:", error)
+                        }
+                        setIsPlaying(false)
+                    })
+                }
                 setIsPlaying(true)
             }
         }
@@ -52,8 +62,8 @@ export default function MusicPlayer() {
             className="fixed bottom-8 right-8 z-[2000] cursor-pointer group pointer-events-auto"
         >
             <div className={`p-3 rounded-full border-2 transition-all duration-300 ${isPlaying
-                    ? 'bg-[#ff0055] border-[#ff0055] shadow-[0_0_20px_#ff0055]'
-                    : 'bg-black/50 border-white/20 hover:border-white'
+                ? 'bg-[#ff0055] border-[#ff0055] shadow-[0_0_20px_#ff0055]'
+                : 'bg-black/50 border-white/20 hover:border-white'
                 }`}>
                 {isPlaying ? (
                     <div className="flex gap-1 h-4 items-end">
