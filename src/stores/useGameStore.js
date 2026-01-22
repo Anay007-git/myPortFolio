@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export default create((set) => ({
+export default create((set, get) => ({
     /**
      * Phases: 'ready' | 'playing' | 'ended'
      */
@@ -10,6 +10,7 @@ export default create((set) => ({
      * Controls: 'character' | 'vehicle'
      */
     controlMode: 'character',
+    currentVehicleId: null,
 
     /**
      * Gamification State
@@ -23,28 +24,46 @@ export default create((set) => ({
         { id: 3, text: 'Initiate Contact Protocol', completed: false, xp: 20 },
     ],
 
-    addXp: (amount) => set((state) => {
+    /**
+     * Interaction
+     */
+    interactionTarget: null, // { type: 'vehicle' | 'mission', id: string, label: string }
+
+    addXp: (amount) => {
+        const state = get()
         const newXp = state.xp + amount
         const nextLevelXp = state.level * 100
 
         if (newXp >= nextLevelXp) {
             const nextLevel = state.level + 1
             const titles = ['Junior Data Novice', 'BI Apprentice', 'Data Alchemist', 'BI Specialist', 'Senior BI Architect']
-            return {
+            set({
                 xp: newXp - nextLevelXp,
                 level: nextLevel,
                 title: titles[Math.min(nextLevel - 1, titles.length - 1)]
-            }
+            })
+        } else {
+            set({ xp: newXp })
         }
-        return { xp: newXp }
-    }),
+    },
+
+    setControlMode: (mode, vehicleId = null) => {
+        set((state) => ({
+            controlMode: mode,
+            currentVehicleId: vehicleId,
+            interactionTarget: mode === 'vehicle' ? null : state.interactionTarget
+        }))
+    },
+
+    setInteractionTarget: (target) => set({ interactionTarget: target }),
 
     showMissionPassed: false,
     lastCompletedQuest: null,
 
-    setShowMissionPassed: (show, quest = null) => set(() => ({ showMissionPassed: show, lastCompletedQuest: quest })),
+    setShowMissionPassed: (show, quest = null) => set({ showMissionPassed: show, lastCompletedQuest: quest }),
 
-    completeQuest: (id) => set((state) => {
+    completeQuest: (id) => {
+        const state = get()
         const quest = state.quests.find(q => q.id === id)
         if (quest && !quest.completed) {
             state.addXp(quest.xp)
@@ -55,12 +74,11 @@ export default create((set) => ({
                 set({ showMissionPassed: false })
             }, 3000)
 
-            return {
+            set({
                 quests: state.quests.map(q => q.id === id ? { ...q, completed: true } : q)
-            }
+            })
         }
-        return {}
-    }),
+    },
 
-    setMission: (mission) => set(() => ({ currentMission: mission })),
+    setMission: (mission) => set({ currentMission: mission }),
 }))

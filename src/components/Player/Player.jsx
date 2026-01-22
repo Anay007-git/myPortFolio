@@ -12,15 +12,13 @@ export default function Player() {
     const [subscribeKeys, getKeys] = useKeyboardControls()
 
     // Load Model
-    // Load Model - COMMENTED OUT TEMPORARILY (TOO LARGE)
-    // const { scene, animations } = useGLTF('/cyberpunk_character.glb')
-    // console.log("Player Model Loaded:", scene)
-    // const { actions } = useAnimations(animations, group)
+    const { scene, animations } = useGLTF('/cyberpunk_character.glb')
+    const { actions } = useAnimations(animations, group)
 
     // DEBUG: Log animations to find correct names
-    // useEffect(() => {
-    //     console.log("Available Animations:", animations.map(a => a.name))
-    // }, [animations])
+    useEffect(() => {
+        console.log("Player Animations:", animations.map(a => a.name))
+    }, [animations])
 
     // Multiplayer Hook
     const { updatePlayer } = useMultiplayer()
@@ -32,19 +30,21 @@ export default function Player() {
     const ROTATION_SPEED = 5
 
     // Cast shadows
-    // useEffect(() => {
-    //     scene.traverse((child) => {
-    //         if (child.isMesh) {
-    //             child.castShadow = true
-    //         }
-    //     })
-    // }, [scene])
+    useEffect(() => {
+        scene.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true
+            }
+        })
+    }, [scene])
+
+    const controlMode = useGameStore((state) => state.controlMode)
 
     const cameraOffset = new THREE.Vector3(0, 5, 8)
     const cameraTarget = new THREE.Vector3()
 
     useFrame((state, delta) => {
-        if (!body.current) return
+        if (!body.current || controlMode !== 'character') return
 
         const { forward, backward, left, right, jump, run } = getKeys()
 
@@ -103,42 +103,53 @@ export default function Player() {
         cameraTarget.lerp(new THREE.Vector3(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z), delta * 5)
         state.camera.lookAt(cameraTarget)
 
-        // --- Animation Logic (Multiplayer Only for now) ---
+        // --- Animation Logic ---
         const isMoving = moveDirection.length() > 0.1
         let actionName = 'Idle'
         if (isMoving) {
             actionName = run ? 'Run' : 'Walk'
         }
 
+        // Apply animations (standard names, might need adjustment after log)
+        const activeAction = actions[actionName] || actions['Walking'] || actions['Running'] || actions['Idle']
+        if (activeAction) {
+            // Fade out others
+            Object.values(actions).forEach(action => {
+                if (action !== activeAction) action.fadeOut(0.2)
+            })
+            activeAction.reset().fadeIn(0.2).play()
+        }
+
         updatePlayer(
             { x: bodyPosition.x, y: bodyPosition.y, z: bodyPosition.z },
-            { x: 0, y: group.current.rotation.y, z: 0, w: 1 }, // Simpler rotation for net
+            { x: 0, y: group.current.rotation.y, z: 0, w: 1 },
             actionName
         )
 
         // --- Jump ---
         if (jump && Math.abs(velocity.y) < 0.1) {
             body.current.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true)
+            if (actions['Jump']) actions['Jump'].play()
         }
     })
 
     return (
         <RigidBody
             ref={body}
+            name="player"
             colliders={false}
             enabledRotations={[false, true, false]}
-            position={[0, 5, 0]} // Higher spawn
+            position={[0, 5, 0]}
             linearDamping={0.5}
         >
             <CapsuleCollider args={[0.5, 0.5]} position={[0, 1, 0]} />
 
             <group ref={group} position={[0, 0, 0]}>
-                {/* <primitive object={scene} scale={1} position={[0, 0, 0]} /> */}
-                <mesh position={[0, 1, 0]}>
-                    <capsuleGeometry args={[0.5, 1, 4, 8]} />
-                    <meshStandardMaterial color="hotpink" />
-                </mesh>
+                <primitive object={scene} scale={0.5} position={[0, 0, 0]} />
             </group>
         </RigidBody>
     )
 }
+
+useGLTF.preload('/cyberpunk_character.glb')
+

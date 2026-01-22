@@ -30,7 +30,14 @@ body,
     background: var(--bg-dark);
     color: var(--text-main);
     font-family: var(--font-body);
-    overflow-x: hidden;
+    overflow: hidden;
+    /* Lock scroll for 3D world */
+}
+
+.app {
+    width: 100%;
+    height: 100%;
+    position: relative;
 }
 
 /* Glassmorphism Utility */

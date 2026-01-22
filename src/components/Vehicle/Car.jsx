@@ -10,6 +10,8 @@ export default function Car({ position }) {
     const [subscribeKeys, getKeys] = useKeyboardControls()
     const controlMode = useGameStore((state) => state.controlMode)
     const setControlMode = useGameStore((state) => state.setControlMode)
+    const setInteractionTarget = useGameStore((state) => state.setInteractionTarget)
+    const interactionTarget = useGameStore((state) => state.interactionTarget)
 
     const carModel = useGLTF('/cyberpunk_car.glb')
     console.log("Car Model Loaded:", carModel)
@@ -24,40 +26,57 @@ export default function Car({ position }) {
     }, [carModel])
 
     // Config
-    const ACCELERATION = 20
-    const BRAKE_POWER = 5
-    const TURN_SPEED = 2
+    const ACCELERATION = 40
+    const BRAKE_POWER = 10
+    const TURN_SPEED = 5
+    const MAX_VELOCITY = 20
 
     useFrame((state, delta) => {
         if (!body.current) return
 
-        // Only control if in vehicle mode
-        if (controlMode !== 'vehicle') return
+        const { forward, backward, left, right } = getKeys()
 
-        const { forward, backward, left, right, interact } = getKeys()
+        // --- Interaction Check (Proximity to enter) ---
+        if (controlMode === 'character') {
+            const bodyPosition = body.current.translation()
+            const player = state.scene.getObjectByName('player')
 
-        // --- Movement ---
-        // Simple arcade physics: Apply force forward relative to car rotation
+            if (player) {
+                const distance = new THREE.Vector3(bodyPosition.x, bodyPosition.y, bodyPosition.z).distanceTo(player.position)
+                if (distance < 5) {
+                    setInteractionTarget({ type: 'vehicle', id: 'car_primary', label: '[E] ENTER VEHICLE' })
+                } else if (interactionTarget?.id === 'car_primary') {
+                    setInteractionTarget(null)
+                }
+            }
+        }
+
+        // Only logic below this is for when driving
+        if (controlMode !== 'vehicle' || useGameStore.getState().currentVehicleId !== 'car_primary') return
+
+        // --- Driving Physics ---
         const currentRotation = body.current.rotation()
         const quaternion = new THREE.Quaternion(currentRotation.x, currentRotation.y, currentRotation.z, currentRotation.w)
-
         const forwardDirection = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion)
+
+        const velocity = body.current.linvel()
+        const currentSpeed = new THREE.Vector3(velocity.x, 0, velocity.z).length()
 
         let impulse = new THREE.Vector3()
         let torque = new THREE.Vector3()
 
-        if (forward) {
+        if (forward && currentSpeed < MAX_VELOCITY) {
             impulse.add(forwardDirection.multiplyScalar(ACCELERATION * delta))
         }
         if (backward) {
-            impulse.sub(forwardDirection.multiplyScalar(ACCELERATION * delta))
+            impulse.sub(forwardDirection.multiplyScalar(BRAKE_POWER * delta))
         }
 
-        if (left) {
-            torque.y += TURN_SPEED * delta
+        if (left && currentSpeed > 1) {
+            torque.y += TURN_SPEED * delta * (currentSpeed / MAX_VELOCITY)
         }
-        if (right) {
-            torque.y -= TURN_SPEED * delta
+        if (right && currentSpeed > 1) {
+            torque.y -= TURN_SPEED * delta * (currentSpeed / MAX_VELOCITY)
         }
 
         body.current.applyImpulse(impulse, true)
@@ -65,47 +84,51 @@ export default function Car({ position }) {
 
         // --- Camera Follow Car ---
         const bodyPosition = body.current.translation()
-        // Offset behind car
-        const cameraOffset = new THREE.Vector3(0, 5, 12).applyQuaternion(quaternion) // Slightly further back for the car model
-        const cameraTargetPos = new THREE.Vector3(
+        const cameraOffset = new THREE.Vector3(0, 4, -10).applyQuaternion(quaternion)
+        const targetCamPos = new THREE.Vector3(
             bodyPosition.x + cameraOffset.x,
             bodyPosition.y + cameraOffset.y,
             bodyPosition.z + cameraOffset.z
         )
 
-        state.camera.position.lerp(cameraTargetPos, delta * 2)
-        state.camera.lookAt(bodyPosition.x, bodyPosition.y, bodyPosition.z)
+        state.camera.position.lerp(targetCamPos, delta * 3)
+        state.camera.lookAt(bodyPosition.x, bodyPosition.y + 1, bodyPosition.z)
     })
 
-    // Interaction check to exit
+    // Interaction handling
     useEffect(() => {
         const unsubscribe = subscribeKeys(
             (state) => state.interact,
             (value) => {
-                if (value && controlMode === 'vehicle') {
-                    setControlMode('character')
-                    // TODO: Teleport player to car exit position
+                if (value) {
+                    const gameState = useGameStore.getState()
+                    if (controlMode === 'vehicle' && gameState.currentVehicleId === 'car_primary') {
+                        setControlMode('character')
+                    } else if (interactionTarget?.id === 'car_primary') {
+                        setControlMode('vehicle', 'car_primary')
+                    }
                 }
             }
         )
         return unsubscribe
-    }, [controlMode, setControlMode, subscribeKeys])
+    }, [controlMode, interactionTarget, setControlMode, subscribeKeys])
 
     return (
         <RigidBody
             ref={body}
+            name="car_primary"
             position={position}
             colliders="cuboid"
-            mass={5}
+            mass={2}
             linearDamping={0.5}
-            angularDamping={0.5}
+            angularDamping={2.0}
         >
             {/* Visuals */}
             <primitive
                 object={carModel.scene}
                 scale={1}
-                rotation-y={Math.PI} // Adjust if model faces backwards
-                position={[0, -1, 0]} // Lower visual to align with collider bottom
+                rotation-y={0}
+                position={[0, -0.5, 0]}
             />
         </RigidBody>
     )

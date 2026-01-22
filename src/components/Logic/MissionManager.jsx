@@ -7,34 +7,42 @@ import { zoneConfig } from '../../data/portfolio.js'
 
 export default function MissionManager() {
     const setMission = useGameStore((state) => state.setMission)
+    const completeQuest = useGameStore((state) => state.completeQuest)
     const currentMission = useGameStore((state) => state.currentMission)
 
-    // Scale down positions for the demo
+    // Scale down positions for the world size
     const missions = zoneConfig.map(zone => ({
         ...zone,
-        position: new THREE.Vector3(zone.position.x * 0.1, 0, zone.position.z * 0.1)
+        position: new THREE.Vector3(zone.position.x * 0.25, 0, zone.position.z * 0.25)
     }))
 
     useFrame((state) => {
-        // Simple distance check from camera (since we don't track player exact pos in store yet)
-        // Better: tack player/vehicle position in store or use a ref passed down.
-        // For now, using camera position which roughly follows player is okay-ish for a quick demo,
-        // but let's try to find the player object in scene by name if we can, or just rely on camera lookAt target.
-        const playerPos = state.camera.position
+        // Track the actual player object
+        const player = state.scene.getObjectByName('player')
+        if (!player) return
+
+        const playerPos = player.position
 
         let nearest = null;
         let dist = Infinity;
 
         missions.forEach(mission => {
             const d = playerPos.distanceTo(mission.position)
-            if (d < 5 && d < dist) {
+            if (d < 6 && d < dist) {
                 nearest = mission
                 dist = d
             }
         })
 
         if (nearest && (!currentMission || currentMission.id !== nearest.id)) {
-            setMission({ title: nearest.name, description: nearest.description })
+            setMission({ id: nearest.id, title: nearest.name, description: nearest.description })
+
+            // Only complete if it maps to a quest ID
+            // Simple mapping: about -> 1, skills -> 2, contact -> 3, experience -> 4
+            const questMap = { 'about': 1, 'skills': 2, 'contact': 3, 'experience': 4 }
+            if (questMap[nearest.id]) {
+                completeQuest(questMap[nearest.id])
+            }
         } else if (!nearest && currentMission) {
             setMission(null)
         }
@@ -44,25 +52,26 @@ export default function MissionManager() {
         <group>
             {missions.map(mission => (
                 <group key={mission.id} position={mission.position}>
-                    {/* Mission Marker Visual */}
-                    <mesh position-y={1}>
-                        <cylinderGeometry args={[1, 1, 0.2, 32]} />
-                        <meshStandardMaterial color={new THREE.Color(mission.color)} transparent opacity={0.5} />
-                    </mesh>
-                    <mesh position-y={1}>
-                        <ringGeometry args={[0.8, 0.9, 32]} />
-                        <meshBasicMaterial color="white" />
+                    {/* Mission Marker Visual - Pulsing Ring */}
+                    <mesh position-y={0.1} rotation-x={-Math.PI / 2}>
+                        <ringGeometry args={[2, 2.2, 32]} />
+                        <meshBasicMaterial color={new THREE.Color(mission.color)} transparent opacity={0.5} side={THREE.DoubleSide} />
                     </mesh>
 
-                    {/* Floating Icon */}
-                    <Html position={[0, 2.5, 0]} center transform sprite>
-                        <div style={{ fontSize: '24px', background: 'rgba(0,0,0,0.5)', padding: '5px', borderRadius: '50%' }}>
-                            {mission.icon}
-                        </div>
-                    </Html>
+                    <mesh position-y={0.15} rotation-x={-Math.PI / 2}>
+                        <circleGeometry args={[2, 32]} />
+                        <meshBasicMaterial color={new THREE.Color(mission.color)} transparent opacity={0.1} side={THREE.DoubleSide} />
+                    </mesh>
 
                     {/* Light Beacon */}
-                    <pointLight color={mission.color} distance={10} intensity={2} />
+                    <pointLight color={mission.color} distance={15} intensity={5} position={[0, 2, 0]} />
+
+                    {/* Floating Label */}
+                    <Html position={[0, 2, 0]} center distanceFactor={15}>
+                        <div className="bg-black/80 text-white px-3 py-1 rounded border-2 border-[#ff0055] whitespace-nowrap font-bold uppercase tracking-tighter">
+                            {mission.name}
+                        </div>
+                    </Html>
                 </group>
             ))}
         </group>
