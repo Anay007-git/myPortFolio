@@ -8,6 +8,18 @@ export default function SkillsSection() {
     const addXp = useGameStore(state => state.addXp)
     const completeQuest = useGameStore(state => state.completeQuest)
 
+    useEffect(() => {
+        gsap.to('.intro-bar-skills', {
+            scrollTrigger: {
+                trigger: sectionRef.current,
+                start: 'top 60%',
+            },
+            width: '100%',
+            duration: 1,
+            ease: 'power2.inOut'
+        })
+    }, [])
+
     const handleSkillCollect = (skill) => {
         addXp(5)
         // Check if all skills were "looked at" (simulated)
@@ -16,6 +28,9 @@ export default function SkillsSection() {
 
     return (
         <section id="skills" ref={sectionRef}>
+            <div className="intro-bar intro-bar-skills">
+                <span className="intro-text">ARSENAL: TECH STACK HARVEST</span>
+            </div>
             <h2 style={{ fontFamily: 'var(--font-header)', fontSize: '2rem', marginBottom: '50px', display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ color: 'var(--accent-primary)' }}>02.</span> TECH ARSENAL
             </h2>

@@ -11,13 +11,20 @@ export default function Hero() {
     useEffect(() => {
         const tl = gsap.timeline()
 
+        // GTA Intro Bar Animation
+        tl.to('.intro-bar-hero', {
+            width: '100%',
+            duration: 1,
+            ease: 'power2.inOut'
+        })
+
         tl.from(contentRef.current.children, {
             y: 50,
             opacity: 0,
             duration: 0.8,
             stagger: 0.2,
             ease: 'power3.out'
-        })
+        }, "-=0.3")
 
         // Initial XP for arriving
         setTimeout(() => addXp(10), 2000)
@@ -25,6 +32,9 @@ export default function Hero() {
 
     return (
         <section id="hero" ref={heroRef} style={{ textAlign: 'center' }}>
+            <div className="intro-bar intro-bar-hero">
+                <span className="intro-text">MISSION: ESTABLISH PROTOCOL</span>
+            </div>
             <div ref={contentRef}>
                 <h2 style={{
                     fontFamily: 'var(--font-header)',

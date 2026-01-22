@@ -13,22 +13,34 @@ export default function ExperienceSection() {
     useEffect(() => {
         const cards = sectionRef.current.querySelectorAll('.exp-card')
 
-        gsap.from(cards, {
+        const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: sectionRef.current,
                 start: 'top 60%',
-            },
+            }
+        })
+
+        tl.to('.intro-bar-exp', {
+            width: '100%',
+            duration: 1,
+            ease: 'power2.inOut'
+        })
+
+        tl.from(cards, {
             x: -100,
             opacity: 0,
             duration: 0.8,
             stagger: 0.3,
             ease: 'power3.out',
             onComplete: () => completeQuest(1) // "Analyze Experience Section"
-        })
+        }, "-=0.5")
     }, [])
 
     return (
         <section id="experience" ref={sectionRef}>
+            <div className="intro-bar intro-bar-exp">
+                <span className="intro-text">MISSION: DATA HEIST</span>
+            </div>
             <h2 style={{ fontFamily: 'var(--font-header)', fontSize: '2rem', marginBottom: '50px', display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ color: 'var(--accent-secondary)' }}>01.</span> CAREER TIMELINE
             </h2>

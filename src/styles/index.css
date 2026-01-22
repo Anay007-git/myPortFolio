@@ -1,18 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=Signika+Negative:wght@700&display=swap');
 
 :root {
     --bg-dark: #0a0a0c;
-    --bg-card: rgba(20, 20, 25, 0.7);
+    --bg-card: rgba(0, 0, 0, 0.8);
     --accent-primary: #00f2ff;
-    /* Cyber Cyan */
     --accent-secondary: #ff0055;
-    /* Electric Pink */
+    --gta-yellow: #ffd700;
+    --gta-green: #2e8b57;
     --text-main: #e0e0e0;
     --text-dim: #a0a0a0;
     --glass-border: rgba(255, 255, 255, 0.1);
     --font-header: 'Orbitron', sans-serif;
+    --font-gta: 'Signika Negative', sans-serif;
     --font-body: 'Inter', sans-serif;
-    --xp-color: #ffd700;
 }
 
 * {
@@ -36,65 +36,71 @@ body,
 /* Glassmorphism Utility */
 .glass {
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
 }
 
-/* Gamified Elements */
-.level-badge {
-    font-family: var(--font-header);
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+/* GTA HUD Elements */
+.hud-text {
+    font-family: var(--font-gta);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+    font-size: 2.5rem;
+    color: var(--gta-yellow);
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+    letter-spacing: -1px;
 }
 
-.xp-bar-container {
+.hud-money {
+    color: var(--gta-green);
+    font-size: 2rem;
+}
+
+/* Wanted Stars */
+.star-container {
+    display: flex;
+    gap: 8px;
+}
+
+.star {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.star.active {
+    color: var(--gta-yellow);
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+}
+
+/* Mission Passed Animation */
+.mission-overlay {
+    position: fixed;
+    top: 40%;
+    left: 0;
     width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    overflow: hidden;
+    z-index: 10000;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
 }
 
-.xp-bar-fill {
-    height: 100%;
-    background: var(--xp-color);
-    box-shadow: 0 0 10px var(--xp-color);
-    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.mission-passed-title {
+    font-family: var(--font-gta);
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--gta-yellow);
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.6);
+    letter-spacing: -3px;
+    margin: 0;
 }
 
-/* Animations */
-@keyframes float {
-    0% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-
-    100% {
-        transform: translateY(0px);
-    }
-}
-
-.animate-float {
-    animation: float 4s ease-in-out infinite;
-}
-
+/* Scanline Effect */
 .scanline {
     width: 100%;
     height: 100%;
     z-index: 100;
-    background: linear-gradient(to bottom,
-            rgba(18, 16, 16, 0) 50%,
-            rgba(0, 0, 0, 0.1) 50%);
+    background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
     background-size: 100% 4px;
     position: fixed;
     top: 0;
@@ -102,7 +108,29 @@ body,
     opacity: 0.1;
 }
 
-/* Section Transitions */
+/* GTA Section Intros */
+.intro-bar {
+    position: absolute;
+    top: 20%;
+    left: 0;
+    width: 0%;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    padding-left: 10%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.intro-text {
+    font-family: var(--font-header);
+    font-size: 1rem;
+    color: white;
+    letter-spacing: 3px;
+}
+
 section {
     min-height: 100vh;
     padding: 100px 10%;

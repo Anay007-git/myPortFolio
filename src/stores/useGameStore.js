@@ -39,10 +39,22 @@ export default create((set) => ({
         return { xp: newXp }
     }),
 
+    showMissionPassed: false,
+    lastCompletedQuest: null,
+
+    setShowMissionPassed: (show, quest = null) => set(() => ({ showMissionPassed: show, lastCompletedQuest: quest })),
+
     completeQuest: (id) => set((state) => {
         const quest = state.quests.find(q => q.id === id)
         if (quest && !quest.completed) {
             state.addXp(quest.xp)
+            state.setShowMissionPassed(true, quest.text)
+
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                set({ showMissionPassed: false })
+            }, 3000)
+
             return {
                 quests: state.quests.map(q => q.id === id ? { ...q, completed: true } : q)
             }
