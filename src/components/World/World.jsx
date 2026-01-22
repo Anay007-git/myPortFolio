@@ -10,14 +10,14 @@ export default function World() {
             {/* City Map */}
             <RigidBody type="fixed" colliders="trimesh">
                 {/* Scaled up seeing as it was invisible/small */}
-                <primitive object={map.scene} scale={10} position={[0, -2, 0]} />
+                <primitive object={map.scene} scale={10} position={[0, 0, 0]} />
             </RigidBody>
 
-            {/* Fallback Ground (Invisible logic floor if needed, but trimesh usually handles it) */}
-            <RigidBody type="fixed" colliders="cuboid" position={[0, -10, 0]}>
-                <mesh receiveShadow rotation-x={-Math.PI / 2} scale={1000}>
+            {/* Fallback Ground (Visible for debugging) */}
+            <RigidBody type="fixed" colliders="cuboid" position={[0, -0.5, 0]}>
+                <mesh receiveShadow rotation-x={-Math.PI / 2} scale={500}>
                     <planeGeometry />
-                    <meshStandardMaterial color="#000" />
+                    <meshStandardMaterial color="green" />
                 </mesh>
             </RigidBody>
         </group>
