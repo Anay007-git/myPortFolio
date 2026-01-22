@@ -5,8 +5,7 @@ import * as THREE from 'three'
 
 const socket = io('http://localhost:3000', {
     autoConnect: false,
-    reconnection: true,
-    reconnectionAttempts: 3,
+    reconnection: false,
     timeout: 5000,
 })
 
