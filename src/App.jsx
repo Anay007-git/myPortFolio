@@ -45,7 +45,7 @@ export default function App() {
                         <fog attach="fog" args={['#050505', 0, 500]} />
 
                         <Suspense fallback={null}>
-                            <Physics gravity={{ x: 0, y: -9.81, z: 0 }}>
+                            <Physics gravity={[0, -9.81, 0]}>
                                 <Experience />
                             </Physics>
                         </Suspense>
