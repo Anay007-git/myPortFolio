@@ -25,7 +25,7 @@ export default function Environment() {
 
     return (
         <group>
-            <ambientLight intensity={0.2} />
+            <ambientLight intensity={2.0} />
             <directionalLight
                 ref={light}
                 castShadow

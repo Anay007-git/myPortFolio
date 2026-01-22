@@ -12,6 +12,7 @@ export default function Car({ position }) {
     const setControlMode = useGameStore((state) => state.setControlMode)
 
     const carModel = useGLTF('/cyberpunk_car.glb')
+    console.log("Car Model Loaded:", carModel)
     // Enable shadows for the model
     useEffect(() => {
         carModel.scene.traverse((child) => {

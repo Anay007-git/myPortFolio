@@ -13,6 +13,7 @@ export default function Player() {
 
     // Load Model
     const { scene, animations } = useGLTF('/cyberpunk_character.glb')
+    console.log("Player Model Loaded:", scene)
     const { actions } = useAnimations(animations, group)
 
     // DEBUG: Log animations to find correct names
