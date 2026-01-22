@@ -1,42 +1,22 @@
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
-import { Physics } from '@react-three/rapier'
-import { KeyboardControls, Loader } from '@react-three/drei'
-import Experience from './Experience.jsx'
-import Interface from './components/UI/Interface.jsx'
+import Navbar from './components/UI/Navbar.jsx'
+import Hero from './components/UI/Hero.jsx'
+import ExperienceSection from './components/UI/ExperienceSection.jsx'
+import SkillsSection from './components/UI/SkillsSection.jsx'
+import ContactSection from './components/UI/ContactSection.jsx'
+import Dashboard from './components/UI/Dashboard.jsx'
 
 export default function App() {
     return (
-        <KeyboardControls
-            map={[
-                { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
-                { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
-                { name: 'left', keys: ['ArrowLeft', 'KeyA'] },
-                { name: 'right', keys: ['ArrowRight', 'KeyD'] },
-                { name: 'jump', keys: ['Space'] },
-                { name: 'run', keys: ['Shift'] },
-                { name: 'interact', keys: ['KeyE', 'KeyF'] },
-            ]}
-        >
-            <Interface />
-            <Canvas
-                shadows
-                camera={{
-                    fov: 45,
-                    near: 0.1,
-                    far: 200,
-                    position: [2.5, 4, 6]
-                }}
-            >
-                <color attach="background" args={['#201919']} />
-
-                <Suspense fallback={null}>
-                    <Physics>
-                        <Experience />
-                    </Physics>
-                </Suspense>
-            </Canvas>
-            <Loader />
-        </KeyboardControls>
+        <div className="app">
+            <div className="scanline"></div>
+            <Navbar />
+            <Dashboard />
+            <main>
+                <Hero />
+                <ExperienceSection />
+                <SkillsSection />
+                <ContactSection />
+            </main>
+        </div>
     )
 }

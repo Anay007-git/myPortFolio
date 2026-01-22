@@ -1,12 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap');
 
 :root {
-    --font-main: 'Inter', sans-serif;
-    --color-accent: #ff0055;
+    --bg-dark: #0a0a0c;
+    --bg-card: rgba(20, 20, 25, 0.7);
+    --accent-primary: #00f2ff;
+    /* Cyber Cyan */
+    --accent-secondary: #ff0055;
+    /* Electric Pink */
+    --text-main: #e0e0e0;
+    --text-dim: #a0a0a0;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --font-header: 'Orbitron', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --xp-color: #ffd700;
 }
 
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    cursor: crosshair;
 }
 
 html,
@@ -14,39 +27,87 @@ body,
 #root {
     width: 100%;
     height: 100%;
-    margin: 0;
-    padding: 0;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+}
+
+/* Glassmorphism Utility */
+.glass {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+/* Gamified Elements */
+.level-badge {
+    font-family: var(--font-header);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+}
+
+.xp-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
     overflow: hidden;
-    font-family: var(--font-main);
-    color: white;
-    -webkit-font-smoothing: antialiased;
 }
 
-.canvas-container {
-    width: 100%;
+.xp-bar-fill {
     height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1;
+    background: var(--xp-color);
+    box-shadow: 0 0 10px var(--xp-color);
+    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.ui-container {
-    position: fixed;
-    top: 0;
-    left: 0;
+/* Animations */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+.scanline {
     width: 100%;
     height: 100%;
-    z-index: 2;
+    z-index: 100;
+    background: linear-gradient(to bottom,
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    position: fixed;
+    top: 0;
     pointer-events: none;
-    /* Let clicks pass through to canvas unless on interactive UI */
+    opacity: 0.1;
 }
 
-/* Utilities */
-.pointer-events-auto {
-    pointer-events: auto;
-}
-
-.hidden {
-    display: none;
+/* Section Transitions */
+section {
+    min-height: 100vh;
+    padding: 100px 10%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }

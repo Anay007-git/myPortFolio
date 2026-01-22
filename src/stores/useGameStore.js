@@ -12,29 +12,43 @@ export default create((set) => ({
     controlMode: 'character',
 
     /**
-     * Missions
+     * Gamification State
      */
-    currentMission: null,
+    xp: 0,
+    level: 1,
+    title: 'Junior Data Novice',
+    quests: [
+        { id: 1, text: 'Analyze Experience Section', completed: false, xp: 50 },
+        { id: 2, text: 'Harvest Tech Skills', completed: false, xp: 30 },
+        { id: 3, text: 'Initiate Contact Protocol', completed: false, xp: 20 },
+    ],
 
-    start: () => set((state) => {
-        if (state.phase === 'ready')
-            return { phase: 'playing' }
-        return {}
+    addXp: (amount) => set((state) => {
+        const newXp = state.xp + amount
+        const nextLevelXp = state.level * 100
+
+        if (newXp >= nextLevelXp) {
+            const nextLevel = state.level + 1
+            const titles = ['Junior Data Novice', 'BI Apprentice', 'Data Alchemist', 'BI Specialist', 'Senior BI Architect']
+            return {
+                xp: newXp - nextLevelXp,
+                level: nextLevel,
+                title: titles[Math.min(nextLevel - 1, titles.length - 1)]
+            }
+        }
+        return { xp: newXp }
     }),
 
-    restart: () => set((state) => {
-        if (state.phase === 'playing' || state.phase === 'ended')
-            return { phase: 'ready', controlMode: 'character', currentMission: null }
+    completeQuest: (id) => set((state) => {
+        const quest = state.quests.find(q => q.id === id)
+        if (quest && !quest.completed) {
+            state.addXp(quest.xp)
+            return {
+                quests: state.quests.map(q => q.id === id ? { ...q, completed: true } : q)
+            }
+        }
         return {}
     }),
-
-    end: () => set((state) => {
-        if (state.phase === 'playing')
-            return { phase: 'ended' }
-        return {}
-    }),
-
-    setControlMode: (mode) => set(() => ({ controlMode: mode })),
 
     setMission: (mission) => set(() => ({ currentMission: mission })),
 }))
