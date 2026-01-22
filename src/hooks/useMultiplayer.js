@@ -9,15 +9,18 @@ const socket = io('http://localhost:3000', {
     timeout: 5000,
 })
 
+// Set this to true only when running the local backend server
+const ENABLE_MULTIPLAYER = false
+
 export default function useMultiplayer() {
     const [players, setPlayers] = useState({})
     const playerBody = useRef(null) // We need a way to get local player position
 
     useEffect(() => {
-        if (!socket.connected) {
+        if (ENABLE_MULTIPLAYER && !socket.connected) {
             socket.on('connect_error', (err) => {
                 // Silently fail if server is not up (only log once if needed, or suppress)
-                // socket.disconnect() // Disconnect handled automatically by reconnection: false usually
+                console.warn('Multiplayer server not found (ENABLE_MULTIPLAYER is true).')
             })
             socket.connect()
         }
