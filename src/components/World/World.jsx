@@ -36,18 +36,7 @@ export default function World() {
             <RigidBody type="fixed" colliders="cuboid" position={[0, -0.5, 0]}>
                 <mesh receiveShadow rotation-x={-Math.PI / 2}>
                     <planeGeometry args={[1000, 1000]} />
-                    <MeshReflectorMaterial
-                        blur={[300, 100]}
-                        resolution={1024}
-                        mixBlur={1}
-                        mixStrength={40}
-                        roughness={1}
-                        depthScale={1.2}
-                        minDepthThreshold={0.4}
-                        maxDepthThreshold={1.4}
-                        color="#101010"
-                        metalness={0.5}
-                    />
+                    <meshStandardMaterial color="#101010" roughness={0.5} metalness={0.5} />
                 </mesh>
                 {/* Visual Grid Layer */}
                 <mesh position={[0, 0.01, 0]} rotation-x={-Math.PI / 2}>

@@ -55,11 +55,11 @@ export default function App() {
                             </Physics>
                         </Suspense>
 
-                        <EffectComposer disableNormalPass>
+                        {/* <EffectComposer disableNormalPass>
                             <Bloom luminanceThreshold={1} mipmapBlur intensity={1.5} radius={0.6} />
                             <ChromaticAberration offset={[0.002, 0.002]} />
                             <Vignette eskil={false} offset={0.1} darkness={0.7} />
-                        </EffectComposer>
+                        </EffectComposer> */}
                     </Canvas>
                 </div>
                 <Loader />
