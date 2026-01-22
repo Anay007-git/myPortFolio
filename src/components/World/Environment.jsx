@@ -1,42 +1,30 @@
-import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
-import { Environment as DreiEnv, Stars } from '@react-three/drei'
+import { Stars } from '@react-three/drei'
 
 export default function Environment() {
     const light = useRef()
 
-    useFrame((state, delta) => {
-        // Simple day/night cycle
-        const time = state.clock.getElapsedTime()
-        const dayDuration = 60 // Seconds for full cycle
-        const progress = (time % dayDuration) / dayDuration
-
-        const sunPos = [
-            Math.sin(progress * Math.PI * 2) * 10,
-            Math.cos(progress * Math.PI * 2) * 10,
-            5
-        ]
-
-        if (light.current) {
-            light.current.position.set(...sunPos)
-            light.current.intensity = Math.max(0, Math.sin(progress * Math.PI) * 2)
-        }
-    })
-
     return (
         <group>
-            <ambientLight intensity={2.0} />
+            <ambientLight intensity={0.5} />
             <directionalLight
                 ref={light}
                 castShadow
+                position={[50, 50, 50]}
+                intensity={1.5}
                 shadow-mapSize={[2048, 2048]}
-                position={[10, 10, 5]}
+                shadow-camera-far={500}
+                shadow-camera-left={-100}
+                shadow-camera-right={100}
+                shadow-camera-top={100}
+                shadow-camera-bottom={-100}
             />
-            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-            {/* <DreiEnv preset="city" /> */}
+            {/* Cyberpunk Accents */}
+            <pointLight position={[-20, 20, -20]} intensity={2} color="#00f2ff" />
+            <pointLight position={[20, 20, 20]} intensity={2} color="#ff0055" />
 
-            {/* Fog for atmosphere */}
-            <fog attach="fog" args={['#202030', 10, 50]} />
+            <Stars radius={200} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+            <fog attach="fog" args={['#050505', 10, 250]} />
         </group>
     )
 }
